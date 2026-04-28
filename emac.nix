@@ -277,26 +277,26 @@
          '(;; Default note
            ("d" "default" plain
             "%?"
-            :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org"
-                               "#+title: ${title}\n#+date: %U\n#+filetags: \n\n")
+            :target (file+head "%<%Y%m%d%H%M%S>-''${slug}.org"
+                               "#+title: ''${title}\n#+date: %U\n#+filetags: \n\n")
             :unnarrowed t)
            ;; Fleeting / quick thought
            ("f" "fleeting" plain
             "* %?\n\n%i"
-            :target (file+head "fleeting/%<%Y%m%d%H%M%S>-${slug}.org"
-                               "#+title: ${title}\n#+date: %U\n#+filetags: :fleeting:\n\n")
+            :target (file+head "fleeting/%<%Y%m%d%H%M%S>-''${slug}.org"
+                               "#+title: ''${title}\n#+date: %U\n#+filetags: :fleeting:\n\n")
             :unnarrowed t)
            ;; Literature note (for reading notes)
            ("l" "literature" plain
             "* Source\n- Author: %^{Author}\n- URL: %^{URL}\n\n* Notes\n%?\n\n* Summary\n"
-            :target (file+head "literature/%<%Y%m%d%H%M%S>-${slug}.org"
-                               "#+title: ${title}\n#+date: %U\n#+filetags: :literature:\n\n")
+            :target (file+head "literature/%<%Y%m%d%H%M%S>-''${slug}.org"
+                               "#+title: ''${title}\n#+date: %U\n#+filetags: :literature:\n\n")
             :unnarrowed t)
            ;; Permanent / evergreen note
            ("p" "permanent" plain
             "%?"
-            :target (file+head "permanent/%<%Y%m%d%H%M%S>-${slug}.org"
-                               "#+title: ${title}\n#+date: %U\n#+filetags: :permanent:\n\n")
+            :target (file+head "permanent/%<%Y%m%d%H%M%S>-''${slug}.org"
+                               "#+title: ''${title}\n#+date: %U\n#+filetags: :permanent:\n\n")
             :unnarrowed t)))
         (org-roam-dailies-capture-templates
          '(("d" "default" entry
