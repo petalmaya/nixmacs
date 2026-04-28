@@ -15,6 +15,8 @@
     mpv         # Media player backend for EMMS
     ffmpeg      # Metadata tools
     cava        # Audio visualizer backend
+    sqlite      # Required by org-roam
+    graphviz    # Optional: for org-roam graph visualizations
   ];
 
   programs.emacs = {
@@ -78,6 +80,11 @@
 
       # Terminal
       vterm
+
+      # Org-roam (knowledge graph / Zettelkasten)
+      org-roam
+      org-roam-ui
+      websocket   # org-roam-ui dependency
     ];
 
     extraConfig = ''
@@ -124,11 +131,20 @@
               centaur-tabs-set-icons t
               centaur-tabs-set-bar 'left
               centaur-tabs-set-modified-marker t
-              centaur-tabs-show-navigation-buttons t)
+              centaur-tabs-show-navigation-buttons t
+              centaur-tabs-gray-out-icons 'buffer
+              centaur-tabs-cycle-scope 'tabs) ; cycle within current group only
         (centaur-tabs-headline-match)
+        (centaur-tabs-group-by-projectile-project) ; group tabs by project
         :bind
+        ;; Classic Ctrl+PageUp/Down
         ("C-<prior>" . centaur-tabs-backward)
-        ("C-<next>" . centaur-tabs-forward))
+        ("C-<next>"  . centaur-tabs-forward))
+
+      ;; Evil gt / gT tab navigation (vim-style)
+      (with-eval-after-load 'evil
+        (define-key evil-normal-state-map (kbd "g t") 'centaur-tabs-forward)
+        (define-key evil-normal-state-map (kbd "g T") 'centaur-tabs-backward))
 
       ;; Dashboard
       (use-package dashboard
@@ -248,6 +264,59 @@
       (use-package lsp-treemacs
         :after (treemacs lsp-mode))
 
+      ;; --- Org-Roam ---
+      (use-package org-roam
+        :demand t
+        :init
+        (setq org-roam-v2-ack t) ; suppress v2 migration warning
+        :custom
+        (org-roam-directory (file-truename "~/org/roam"))
+        (org-roam-completion-everywhere t) ; complete node links anywhere in org files
+        (org-roam-dailies-directory "daily/") ; subdir inside org-roam-directory
+        (org-roam-capture-templates
+         '(;; Default note
+           ("d" "default" plain
+            "%?"
+            :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org"
+                               "#+title: ${title}\n#+date: %U\n#+filetags: \n\n")
+            :unnarrowed t)
+           ;; Fleeting / quick thought
+           ("f" "fleeting" plain
+            "* %?\n\n%i"
+            :target (file+head "fleeting/%<%Y%m%d%H%M%S>-${slug}.org"
+                               "#+title: ${title}\n#+date: %U\n#+filetags: :fleeting:\n\n")
+            :unnarrowed t)
+           ;; Literature note (for reading notes)
+           ("l" "literature" plain
+            "* Source\n- Author: %^{Author}\n- URL: %^{URL}\n\n* Notes\n%?\n\n* Summary\n"
+            :target (file+head "literature/%<%Y%m%d%H%M%S>-${slug}.org"
+                               "#+title: ${title}\n#+date: %U\n#+filetags: :literature:\n\n")
+            :unnarrowed t)
+           ;; Permanent / evergreen note
+           ("p" "permanent" plain
+            "%?"
+            :target (file+head "permanent/%<%Y%m%d%H%M%S>-${slug}.org"
+                               "#+title: ${title}\n#+date: %U\n#+filetags: :permanent:\n\n")
+            :unnarrowed t)))
+        (org-roam-dailies-capture-templates
+         '(("d" "default" entry
+            "* %<%H:%M> %?"
+            :target (file+head "%<%Y-%m-%d>.org"
+                               "#+title: %<%Y-%m-%d>\n#+filetags: :daily:\n\n"))))
+        :config
+        ;; Create the roam directory if it doesn't exist yet
+        (make-directory org-roam-directory t)
+        (org-roam-db-autosync-mode))
+
+      ;; --- Org-Roam UI (Interactive graph in browser) ---
+      (use-package org-roam-ui
+        :after org-roam
+        :config
+        (setq org-roam-ui-sync-theme t       ; sync Emacs theme to the graph UI
+              org-roam-ui-follow t            ; graph follows current node
+              org-roam-ui-update-on-save t    ; refresh graph on save
+              org-roam-ui-open-on-start nil)) ; don't auto-open browser on startup
+
       ;; --- Keybindings (General.el) ---
       (require 'general)
       (general-evil-setup t)
@@ -268,12 +337,20 @@
         "fs"  '(save-buffer :which-key "save file")
         "fr"  '(counsel-recentf :which-key "recent files")
         
-        ;; Buffers
-        "b"   '(:ignore t :which-key "buffers")
+        ;; Buffers / Tabs
+        "b"   '(:ignore t :which-key "buffers/tabs")
         "bb"  '(ivy-switch-buffer :which-key "switch buffer")
         "bn"  '(centaur-tabs-forward :which-key "next tab")
         "bp"  '(centaur-tabs-backward :which-key "prev tab")
         "bd"  '(kill-current-buffer :which-key "kill buffer")
+        ;; Tab group navigation
+        "bN"  '(centaur-tabs-forward-group :which-key "next tab group")
+        "bP"  '(centaur-tabs-backward-group :which-key "prev tab group")
+        ;; Move tabs around
+        "b>"  '(centaur-tabs-move-current-tab-to-right :which-key "move tab right")
+        "b<"  '(centaur-tabs-move-current-tab-to-left :which-key "move tab left")
+        ;; Tab groups
+        "bg"  '(centaur-tabs-switch-group :which-key "switch tab group")
         
         ;; Windows
         "w"   '(:ignore t :which-key "windows")
@@ -306,6 +383,24 @@
         ;; Terminal
         "t"   '(:ignore t :which-key "terminal")
         "tt"  '(vterm :which-key "vterm")
+
+        ;; Notes (Org-Roam)
+        "n"   '(:ignore t :which-key "notes")
+        ;; Core node actions
+        "nf"  '(org-roam-node-find :which-key "find node")
+        "ni"  '(org-roam-node-insert :which-key "insert link")
+        "nc"  '(org-roam-capture :which-key "capture note")
+        ;; Buffer / graph panel
+        "nb"  '(org-roam-buffer-toggle :which-key "toggle backlinks")
+        "nU"  '(org-roam-ui-open :which-key "open graph UI")
+        ;; Dailies
+        "nd"  '(:ignore t :which-key "dailies")
+        "ndt" '(org-roam-dailies-goto-today :which-key "today")
+        "ndy" '(org-roam-dailies-goto-yesterday :which-key "yesterday")
+        "ndd" '(org-roam-dailies-goto-date :which-key "pick date")
+        "ndc" '(org-roam-dailies-capture-today :which-key "capture today")
+        ;; DB
+        "ns"  '(org-roam-db-sync :which-key "sync DB")
       )
 
       ;; --- LSP Mode ---
