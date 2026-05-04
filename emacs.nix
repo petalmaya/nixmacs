@@ -17,6 +17,8 @@
     cava        # Audio visualizer backend
     sqlite      # Required by org-roam
     graphviz    # Optional: for org-roam graph visualizations
+    mu          # Required by mu4e
+    isync       # Commonly used with mu4e for fetching mail
   ];
 
   programs.emacs = {
@@ -83,6 +85,11 @@
       org-roam
       org-roam-ui
       websocket   # org-roam-ui dependency
+
+      # Mail, RSS, and EPUBs
+      nov
+      elfeed
+      mu4e
     ];
 
     extraConfig = ''
@@ -488,6 +495,26 @@
         :commands vterm
         :config
         (setq vterm-max-scrollback 5000))
+
+      ;; --- Nov.el (EPUB Reader) ---
+      (use-package nov
+        :mode ("\\.epub\\'" . nov-mode)
+        :config
+        (setq nov-text-width 80))
+
+      ;; --- Elfeed (RSS Reader) ---
+      (use-package elfeed
+        :commands elfeed
+        :bind ("C-x w" . elfeed))
+
+      ;; --- Mu4e (Email Client) ---
+      (use-package mu4e
+        :commands mu4e
+        :config
+        (setq mu4e-change-filenames-when-moving t
+              mu4e-update-interval (* 10 60)
+              mu4e-get-mail-command "mbsync -a"
+              mu4e-maildir "~/Mail"))
     '';
   };
 }
