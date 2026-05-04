@@ -24,9 +24,8 @@
     package = pkgs.emacs-pgtk;
 
     extraPackages = epkgs: with epkgs; [
-      # Evil mode (Vim bindings)
-      evil
-      evil-collection
+      # Modal editing
+      xah-fly-keys
       
       # UI & Theming
       doom-themes
@@ -41,9 +40,8 @@
       swiper
       ivy-posframe
       
-      # Key discovery (like Spacemacs)
+      # Key discovery
       which-key
-      general
       use-package # Added for lazy loading
       
       # Project management & Git
@@ -70,7 +68,6 @@
 
       # Tree Explorer
       treemacs
-      treemacs-evil
       treemacs-projectile
       treemacs-magit
       lsp-treemacs
@@ -141,39 +138,36 @@
         ("C-<prior>" . centaur-tabs-backward)
         ("C-<next>"  . centaur-tabs-forward))
 
-      ;; Evil gt / gT tab navigation (vim-style)
-      (with-eval-after-load 'evil
-        (define-key evil-normal-state-map (kbd "g t") 'centaur-tabs-forward)
-        (define-key evil-normal-state-map (kbd "g T") 'centaur-tabs-backward))
 
       ;; Dashboard
       (use-package dashboard
         :demand t
-        :config
+        :init
+        ;; Must be in :init so the hook is registered before Emacs
+        ;; processes the startup buffer (too late if done in :config).
         (dashboard-setup-startup-hook)
+        :config
         (setq dashboard-center-content t)
         (setq dashboard-banner-logo-title " Helllooooo Alice!")
         (setq dashboard-startup-banner "/home/alice/nixmacs/assets/logo.png")
+        (setq dashboard-set-heading-icons t)
+        (setq dashboard-set-file-icons t)
         (setq dashboard-items '((recents  . 5)
                                 (projects . 5)))
-        ;; Ensure dashboard is the initial buffer
-        (setq initial-buffer-choice (lambda () (get-buffer-create "*dashboard*"))))
+        ;; Jump to a fully-rendered dashboard as the initial buffer.
+        (setq initial-buffer-choice
+              (lambda ()
+                (get-buffer-create "*dashboard*"))))
 
-      ;; --- Evil Mode Unholy ---
-      (use-package evil
+      ;; --- Xah Fly Keys (Modal editing) ---
+      (use-package xah-fly-keys
         :demand t
-        :init
-        (setq evil-want-integration t)
-        (setq evil-want-keybinding nil)
-        (setq evil-want-C-u-scroll t)
-        (setq evil-want-C-i-jump t)
         :config
-        (evil-mode 1))
+        (xah-fly-keys-set-layout "qwerty")
+        (xah-fly-keys 1)
+        ;; Use Escape to enter command mode
+        (define-key xah-fly-key-map (kbd "<escape>") 'xah-fly-command-mode-activate))
 
-      (use-package evil-collection
-        :after evil
-        :config
-        (evil-collection-init))
 
       ;; --- Magit ---
       (use-package magit
@@ -252,9 +246,6 @@
         (when treemacs-python-executable
           (treemacs-git-commit-diff-mode t)))
 
-      (use-package treemacs-evil
-        :after (treemacs evil))
-
       (use-package treemacs-projectile
         :after (treemacs projectile))
 
@@ -317,91 +308,86 @@
               org-roam-ui-update-on-save t    ; refresh graph on save
               org-roam-ui-open-on-start nil)) ; don't auto-open browser on startup
 
-      ;; --- Keybindings (General.el) ---
-      (require 'general)
-      (general-evil-setup t)
-      
-      (general-create-definer my-leader-def
-        :states '(normal visual insert emacs)
-        :keymaps 'override
-        :prefix "SPC"
-        :global-prefix "C-SPC")
+      ;; --- Keybindings (Xah Fly Keys command mode) ---
+      ;; Press Escape to enter command mode, then use SPC as leader.
 
-      ;; "SPC" bindings
-      (my-leader-def
-        "SPC" '(counsel-M-x :which-key "M-x")
-        
+      (with-eval-after-load 'xah-fly-keys
+        (define-key xah-fly-command-map (kbd "SPC SPC") 'counsel-M-x)
+
         ;; Files
-        "f"   '(:ignore t :which-key "files")
-        "ff"  '(counsel-find-file :which-key "find file")
-        "fs"  '(save-buffer :which-key "save file")
-        "fr"  '(counsel-recentf :which-key "recent files")
-        
-        ;; Buffers / Tabs
-        "b"   '(:ignore t :which-key "buffers/tabs")
-        "bb"  '(ivy-switch-buffer :which-key "switch buffer")
-        "bn"  '(centaur-tabs-forward :which-key "next tab")
-        "bp"  '(centaur-tabs-backward :which-key "prev tab")
-        "bd"  '(kill-current-buffer :which-key "kill buffer")
-        ;; Tab group navigation
-        "bN"  '(centaur-tabs-forward-group :which-key "next tab group")
-        "bP"  '(centaur-tabs-backward-group :which-key "prev tab group")
-        ;; Move tabs around
-        "b>"  '(centaur-tabs-move-current-tab-to-right :which-key "move tab right")
-        "b<"  '(centaur-tabs-move-current-tab-to-left :which-key "move tab left")
-        ;; Tab groups
-        "bg"  '(centaur-tabs-switch-group :which-key "switch tab group")
-        
-        ;; Windows
-        "w"   '(:ignore t :which-key "windows")
-        "wl"  '(evil-window-right :which-key "right")
-        "wh"  '(evil-window-left :which-key "left")
-        "wj"  '(evil-window-down :which-key "down")
-        "wk"  '(evil-window-up :which-key "up")
-        "wv"  '(evil-window-vsplit :which-key "vsplit")
-        "ws"  '(evil-window-split :which-key "split")
-        "wd"  '(evil-window-delete :which-key "delete")
-        
-        ;; Projects
-        "p"   '(:ignore t :which-key "projects")
-        "pf"  '(projectile-find-file :which-key "find file in project")
-        "pp"  '(projectile-switch-project :which-key "switch project")
-        
-        ;; Git
-        "g"   '(:ignore t :which-key "git")
-        "gs"  '(magit-status :which-key "magit status")
+        (define-key xah-fly-command-map (kbd "SPC f f") 'counsel-find-file)
+        (define-key xah-fly-command-map (kbd "SPC f s") 'save-buffer)
+        (define-key xah-fly-command-map (kbd "SPC f r") 'counsel-recentf)
 
-        ;; Trees / Explorer
-        "e"   '(:ignore t :which-key "explorer")
-        "ee"  '(treemacs :which-key "toggle treemacs")
-        "ef"  '(treemacs-find-file :which-key "find current file")
-        "ep"  '(treemacs-projectile :which-key "projectile tree")
-        "es"  '(lsp-treemacs-symbols :which-key "lsp symbols")
-        "ei"  '(lsp-treemacs-implementations :which-key "lsp implementations")
-        "er"  '(lsp-treemacs-references :which-key "lsp references")
+        ;; Buffers / Tabs
+        (define-key xah-fly-command-map (kbd "SPC b b") 'ivy-switch-buffer)
+        (define-key xah-fly-command-map (kbd "SPC b n") 'centaur-tabs-forward)
+        (define-key xah-fly-command-map (kbd "SPC b p") 'centaur-tabs-backward)
+        (define-key xah-fly-command-map (kbd "SPC b d") 'kill-current-buffer)
+        (define-key xah-fly-command-map (kbd "SPC b N") 'centaur-tabs-forward-group)
+        (define-key xah-fly-command-map (kbd "SPC b P") 'centaur-tabs-backward-group)
+        (define-key xah-fly-command-map (kbd "SPC b >") 'centaur-tabs-move-current-tab-to-right)
+        (define-key xah-fly-command-map (kbd "SPC b <") 'centaur-tabs-move-current-tab-to-left)
+        (define-key xah-fly-command-map (kbd "SPC b g") 'centaur-tabs-switch-group)
+
+        ;; Windows
+        (define-key xah-fly-command-map (kbd "SPC w l") 'windmove-right)
+        (define-key xah-fly-command-map (kbd "SPC w h") 'windmove-left)
+        (define-key xah-fly-command-map (kbd "SPC w j") 'windmove-down)
+        (define-key xah-fly-command-map (kbd "SPC w k") 'windmove-up)
+        (define-key xah-fly-command-map (kbd "SPC w v") 'split-window-right)
+        (define-key xah-fly-command-map (kbd "SPC w s") 'split-window-below)
+        (define-key xah-fly-command-map (kbd "SPC w d") 'delete-window)
+
+        ;; Projects
+        (define-key xah-fly-command-map (kbd "SPC p f") 'projectile-find-file)
+        (define-key xah-fly-command-map (kbd "SPC p p") 'projectile-switch-project)
+
+        ;; Git
+        (define-key xah-fly-command-map (kbd "SPC g s") 'magit-status)
+
+        ;; Explorer
+        (define-key xah-fly-command-map (kbd "SPC e e") 'treemacs)
+        (define-key xah-fly-command-map (kbd "SPC e f") 'treemacs-find-file)
+        (define-key xah-fly-command-map (kbd "SPC e p") 'treemacs-projectile)
+        (define-key xah-fly-command-map (kbd "SPC e s") 'lsp-treemacs-symbols)
+        (define-key xah-fly-command-map (kbd "SPC e i") 'lsp-treemacs-implementations)
+        (define-key xah-fly-command-map (kbd "SPC e r") 'lsp-treemacs-references)
 
         ;; Terminal
-        "t"   '(:ignore t :which-key "terminal")
-        "tt"  '(vterm :which-key "vterm")
+        (define-key xah-fly-command-map (kbd "SPC t t") 'vterm)
 
         ;; Notes (Org-Roam)
-        "n"   '(:ignore t :which-key "notes")
-        ;; Core node actions
-        "nf"  '(org-roam-node-find :which-key "find node")
-        "ni"  '(org-roam-node-insert :which-key "insert link")
-        "nc"  '(org-roam-capture :which-key "capture note")
-        ;; Buffer / graph panel
-        "nb"  '(org-roam-buffer-toggle :which-key "toggle backlinks")
-        "nU"  '(org-roam-ui-open :which-key "open graph UI")
-        ;; Dailies
-        "nd"  '(:ignore t :which-key "dailies")
-        "ndt" '(org-roam-dailies-goto-today :which-key "today")
-        "ndy" '(org-roam-dailies-goto-yesterday :which-key "yesterday")
-        "ndd" '(org-roam-dailies-goto-date :which-key "pick date")
-        "ndc" '(org-roam-dailies-capture-today :which-key "capture today")
-        ;; DB
-        "ns"  '(org-roam-db-sync :which-key "sync DB")
-      )
+        (define-key xah-fly-command-map (kbd "SPC n f") 'org-roam-node-find)
+        (define-key xah-fly-command-map (kbd "SPC n i") 'org-roam-node-insert)
+        (define-key xah-fly-command-map (kbd "SPC n c") 'org-roam-capture)
+        (define-key xah-fly-command-map (kbd "SPC n b") 'org-roam-buffer-toggle)
+        (define-key xah-fly-command-map (kbd "SPC n U") 'org-roam-ui-open)
+        (define-key xah-fly-command-map (kbd "SPC n d t") 'org-roam-dailies-goto-today)
+        (define-key xah-fly-command-map (kbd "SPC n d y") 'org-roam-dailies-goto-yesterday)
+        (define-key xah-fly-command-map (kbd "SPC n d d") 'org-roam-dailies-goto-date)
+        (define-key xah-fly-command-map (kbd "SPC n d c") 'org-roam-dailies-capture-today)
+        (define-key xah-fly-command-map (kbd "SPC n s") 'org-roam-db-sync)
+
+        ;; Media
+        (define-key xah-fly-command-map (kbd "SPC m v") 'nixmacs-watch-video)
+
+        ;; Apps / Fun
+        (define-key xah-fly-command-map (kbd "SPC a f") 'fireplace)
+
+        ;; Which-key hints
+        (which-key-add-key-based-replacements
+          "SPC f" "files"
+          "SPC b" "buffers/tabs"
+          "SPC w" "windows"
+          "SPC p" "projects"
+          "SPC g" "git"
+          "SPC e" "explorer"
+          "SPC t" "terminal"
+          "SPC n" "notes"
+          "SPC n d" "dailies"
+          "SPC m" "media"
+          "SPC a" "apps/fun"))
 
       ;; --- LSP Mode ---
       (use-package lsp-mode
@@ -463,19 +449,11 @@
         (interactive "fVideo file: ")
         (start-process "mpv" nil "mpv" file))
 
-      ;; SPC m v to watch video
-      (my-leader-def
-        "m"  '(:ignore t :which-key "media")
-        "mv" '(nixmacs-watch-video :which-key "watch video (mpv)"))
 
       ;; --- Visualizers & Fun ---
       (use-package fireplace
         :commands fireplace)
 
-      ;; --- Keybindings for visualizers ---
-      (my-leader-def
-        "a"   '(:ignore t :which-key "apps/fun")
-        "af"  '(fireplace :which-key "cozy fireplace"))
 
       ;; --- Vterm ---
       (use-package vterm
