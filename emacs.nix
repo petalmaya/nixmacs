@@ -24,7 +24,7 @@
     package = pkgs.emacs-pgtk;
 
     extraPackages = epkgs: with epkgs; [
-      # Modal editing
+      # Xah Fly Keys (modal editing)
       xah-fly-keys
       
       # UI & Theming
@@ -42,7 +42,7 @@
       
       # Key discovery
       which-key
-      use-package # Added for lazy loading
+      use-package
       
       # Project management & Git
       projectile
@@ -68,6 +68,7 @@
 
       # Tree Explorer
       treemacs
+
       treemacs-projectile
       treemacs-magit
       lsp-treemacs
@@ -139,35 +140,27 @@
         ("C-<next>"  . centaur-tabs-forward))
 
 
+
       ;; Dashboard
       (use-package dashboard
         :demand t
         :init
-        ;; Must be in :init so the hook is registered before Emacs
-        ;; processes the startup buffer (too late if done in :config).
-        (dashboard-setup-startup-hook)
+        (setq dashboard-center-content t
+              dashboard-banner-logo-title " Helllooooo Alice!"
+              dashboard-startup-banner "/home/alice/nixmacs/assets/logo.png"
+              dashboard-items '((recents  . 5)
+                                (projects . 5))
+              initial-buffer-choice (lambda () (get-buffer-create dashboard-buffer-name)))
         :config
-        (setq dashboard-center-content t)
-        (setq dashboard-banner-logo-title " Helllooooo Alice!")
-        (setq dashboard-startup-banner "/home/alice/nixmacs/assets/logo.png")
-        (setq dashboard-set-heading-icons t)
-        (setq dashboard-set-file-icons t)
-        (setq dashboard-items '((recents  . 5)
-                                (projects . 5)))
-        ;; Jump to a fully-rendered dashboard as the initial buffer.
-        (setq initial-buffer-choice
-              (lambda ()
-                (get-buffer-create "*dashboard*"))))
+        (dashboard-setup-startup-hook)
+        (dashboard-insert-startupify-lists))
 
-      ;; --- Xah Fly Keys (Modal editing) ---
+      ;; --- Xah Fly Keys (Modal Editing) ---
       (use-package xah-fly-keys
         :demand t
         :config
         (xah-fly-keys-set-layout "qwerty")
-        (xah-fly-keys 1)
-        ;; Use Escape to enter command mode
-        (define-key xah-fly-key-map (kbd "<escape>") 'xah-fly-command-mode-activate))
-
+        (xah-fly-keys 1))
 
       ;; --- Magit ---
       (use-package magit
@@ -246,6 +239,8 @@
         (when treemacs-python-executable
           (treemacs-git-commit-diff-mode t)))
 
+
+
       (use-package treemacs-projectile
         :after (treemacs projectile))
 
@@ -308,86 +303,117 @@
               org-roam-ui-update-on-save t    ; refresh graph on save
               org-roam-ui-open-on-start nil)) ; don't auto-open browser on startup
 
-      ;; --- Keybindings (Xah Fly Keys command mode) ---
-      ;; Press Escape to enter command mode, then use SPC as leader.
-
+      ;; --- Keybindings (SPC Leader via Xah Fly Keys) ---
       (with-eval-after-load 'xah-fly-keys
-        (define-key xah-fly-command-map (kbd "SPC SPC") 'counsel-M-x)
+        ;; Define prefix keymaps
+        (define-prefix-command 'my-leader-map)
+        (define-prefix-command 'my-file-map)
+        (define-prefix-command 'my-buffer-map)
+        (define-prefix-command 'my-window-map)
+        (define-prefix-command 'my-project-map)
+        (define-prefix-command 'my-git-map)
+        (define-prefix-command 'my-explorer-map)
+        (define-prefix-command 'my-terminal-map)
+        (define-prefix-command 'my-notes-map)
+        (define-prefix-command 'my-notes-daily-map)
+        (define-prefix-command 'my-media-map)
+        (define-prefix-command 'my-apps-map)
 
-        ;; Files
-        (define-key xah-fly-command-map (kbd "SPC f f") 'counsel-find-file)
-        (define-key xah-fly-command-map (kbd "SPC f s") 'save-buffer)
-        (define-key xah-fly-command-map (kbd "SPC f r") 'counsel-recentf)
+        ;; SPC in command mode → leader map
+        (define-key xah-fly-command-map (kbd "SPC") 'my-leader-map)
+        ;; C-SPC as global fallback (works in insert mode too)
+        (global-set-key (kbd "C-SPC") 'my-leader-map)
 
-        ;; Buffers / Tabs
-        (define-key xah-fly-command-map (kbd "SPC b b") 'ivy-switch-buffer)
-        (define-key xah-fly-command-map (kbd "SPC b n") 'centaur-tabs-forward)
-        (define-key xah-fly-command-map (kbd "SPC b p") 'centaur-tabs-backward)
-        (define-key xah-fly-command-map (kbd "SPC b d") 'kill-current-buffer)
-        (define-key xah-fly-command-map (kbd "SPC b N") 'centaur-tabs-forward-group)
-        (define-key xah-fly-command-map (kbd "SPC b P") 'centaur-tabs-backward-group)
-        (define-key xah-fly-command-map (kbd "SPC b >") 'centaur-tabs-move-current-tab-to-right)
-        (define-key xah-fly-command-map (kbd "SPC b <") 'centaur-tabs-move-current-tab-to-left)
-        (define-key xah-fly-command-map (kbd "SPC b g") 'centaur-tabs-switch-group)
+        ;; Top-level
+        (define-key my-leader-map (kbd "SPC") 'counsel-M-x)
 
-        ;; Windows
-        (define-key xah-fly-command-map (kbd "SPC w l") 'windmove-right)
-        (define-key xah-fly-command-map (kbd "SPC w h") 'windmove-left)
-        (define-key xah-fly-command-map (kbd "SPC w j") 'windmove-down)
-        (define-key xah-fly-command-map (kbd "SPC w k") 'windmove-up)
-        (define-key xah-fly-command-map (kbd "SPC w v") 'split-window-right)
-        (define-key xah-fly-command-map (kbd "SPC w s") 'split-window-below)
-        (define-key xah-fly-command-map (kbd "SPC w d") 'delete-window)
+        ;; Files (SPC f)
+        (define-key my-leader-map (kbd "f") 'my-file-map)
+        (define-key my-file-map (kbd "f") 'counsel-find-file)
+        (define-key my-file-map (kbd "s") 'save-buffer)
+        (define-key my-file-map (kbd "r") 'counsel-recentf)
 
-        ;; Projects
-        (define-key xah-fly-command-map (kbd "SPC p f") 'projectile-find-file)
-        (define-key xah-fly-command-map (kbd "SPC p p") 'projectile-switch-project)
+        ;; Buffers / Tabs (SPC b)
+        (define-key my-leader-map (kbd "b") 'my-buffer-map)
+        (define-key my-buffer-map (kbd "b") 'ivy-switch-buffer)
+        (define-key my-buffer-map (kbd "n") 'centaur-tabs-forward)
+        (define-key my-buffer-map (kbd "p") 'centaur-tabs-backward)
+        (define-key my-buffer-map (kbd "d") 'kill-current-buffer)
+        (define-key my-buffer-map (kbd "N") 'centaur-tabs-forward-group)
+        (define-key my-buffer-map (kbd "P") 'centaur-tabs-backward-group)
+        (define-key my-buffer-map (kbd ">") 'centaur-tabs-move-current-tab-to-right)
+        (define-key my-buffer-map (kbd "<") 'centaur-tabs-move-current-tab-to-left)
+        (define-key my-buffer-map (kbd "g") 'centaur-tabs-switch-group)
 
-        ;; Git
-        (define-key xah-fly-command-map (kbd "SPC g s") 'magit-status)
+        ;; Windows (SPC w)
+        (define-key my-leader-map (kbd "w") 'my-window-map)
+        (define-key my-window-map (kbd "l") 'windmove-right)
+        (define-key my-window-map (kbd "h") 'windmove-left)
+        (define-key my-window-map (kbd "j") 'windmove-down)
+        (define-key my-window-map (kbd "k") 'windmove-up)
+        (define-key my-window-map (kbd "v") 'split-window-right)
+        (define-key my-window-map (kbd "s") 'split-window-below)
+        (define-key my-window-map (kbd "d") 'delete-window)
 
-        ;; Explorer
-        (define-key xah-fly-command-map (kbd "SPC e e") 'treemacs)
-        (define-key xah-fly-command-map (kbd "SPC e f") 'treemacs-find-file)
-        (define-key xah-fly-command-map (kbd "SPC e p") 'treemacs-projectile)
-        (define-key xah-fly-command-map (kbd "SPC e s") 'lsp-treemacs-symbols)
-        (define-key xah-fly-command-map (kbd "SPC e i") 'lsp-treemacs-implementations)
-        (define-key xah-fly-command-map (kbd "SPC e r") 'lsp-treemacs-references)
+        ;; Projects (SPC p)
+        (define-key my-leader-map (kbd "p") 'my-project-map)
+        (define-key my-project-map (kbd "f") 'projectile-find-file)
+        (define-key my-project-map (kbd "p") 'projectile-switch-project)
 
-        ;; Terminal
-        (define-key xah-fly-command-map (kbd "SPC t t") 'vterm)
+        ;; Git (SPC g)
+        (define-key my-leader-map (kbd "g") 'my-git-map)
+        (define-key my-git-map (kbd "s") 'magit-status)
 
-        ;; Notes (Org-Roam)
-        (define-key xah-fly-command-map (kbd "SPC n f") 'org-roam-node-find)
-        (define-key xah-fly-command-map (kbd "SPC n i") 'org-roam-node-insert)
-        (define-key xah-fly-command-map (kbd "SPC n c") 'org-roam-capture)
-        (define-key xah-fly-command-map (kbd "SPC n b") 'org-roam-buffer-toggle)
-        (define-key xah-fly-command-map (kbd "SPC n U") 'org-roam-ui-open)
-        (define-key xah-fly-command-map (kbd "SPC n d t") 'org-roam-dailies-goto-today)
-        (define-key xah-fly-command-map (kbd "SPC n d y") 'org-roam-dailies-goto-yesterday)
-        (define-key xah-fly-command-map (kbd "SPC n d d") 'org-roam-dailies-goto-date)
-        (define-key xah-fly-command-map (kbd "SPC n d c") 'org-roam-dailies-capture-today)
-        (define-key xah-fly-command-map (kbd "SPC n s") 'org-roam-db-sync)
+        ;; Explorer (SPC e)
+        (define-key my-leader-map (kbd "e") 'my-explorer-map)
+        (define-key my-explorer-map (kbd "e") 'treemacs)
+        (define-key my-explorer-map (kbd "f") 'treemacs-find-file)
+        (define-key my-explorer-map (kbd "p") 'treemacs-projectile)
+        (define-key my-explorer-map (kbd "s") 'lsp-treemacs-symbols)
+        (define-key my-explorer-map (kbd "i") 'lsp-treemacs-implementations)
+        (define-key my-explorer-map (kbd "r") 'lsp-treemacs-references)
 
-        ;; Media
-        (define-key xah-fly-command-map (kbd "SPC m v") 'nixmacs-watch-video)
+        ;; Terminal (SPC t)
+        (define-key my-leader-map (kbd "t") 'my-terminal-map)
+        (define-key my-terminal-map (kbd "t") 'vterm)
 
-        ;; Apps / Fun
-        (define-key xah-fly-command-map (kbd "SPC a f") 'fireplace)
+        ;; Notes / Org-Roam (SPC n)
+        (define-key my-leader-map (kbd "n") 'my-notes-map)
+        (define-key my-notes-map (kbd "f") 'org-roam-node-find)
+        (define-key my-notes-map (kbd "i") 'org-roam-node-insert)
+        (define-key my-notes-map (kbd "c") 'org-roam-capture)
+        (define-key my-notes-map (kbd "b") 'org-roam-buffer-toggle)
+        (define-key my-notes-map (kbd "U") 'org-roam-ui-open)
+        (define-key my-notes-map (kbd "d") 'my-notes-daily-map)
+        (define-key my-notes-daily-map (kbd "t") 'org-roam-dailies-goto-today)
+        (define-key my-notes-daily-map (kbd "y") 'org-roam-dailies-goto-yesterday)
+        (define-key my-notes-daily-map (kbd "d") 'org-roam-dailies-goto-date)
+        (define-key my-notes-daily-map (kbd "c") 'org-roam-dailies-capture-today)
+        (define-key my-notes-map (kbd "s") 'org-roam-db-sync)
 
-        ;; Which-key hints
-        (which-key-add-key-based-replacements
-          "SPC f" "files"
-          "SPC b" "buffers/tabs"
-          "SPC w" "windows"
-          "SPC p" "projects"
-          "SPC g" "git"
-          "SPC e" "explorer"
-          "SPC t" "terminal"
-          "SPC n" "notes"
-          "SPC n d" "dailies"
-          "SPC m" "media"
-          "SPC a" "apps/fun"))
+        ;; Media (SPC m)
+        (define-key my-leader-map (kbd "m") 'my-media-map)
+        (define-key my-media-map (kbd "v") 'nixmacs-watch-video)
+
+        ;; Apps / Fun (SPC a)
+        (define-key my-leader-map (kbd "a") 'my-apps-map)
+        (define-key my-apps-map (kbd "f") 'fireplace)
+
+        ;; Which-key prefix descriptions
+        (with-eval-after-load 'which-key
+          (which-key-add-keymap-based-replacements my-leader-map
+            "f" "files"
+            "b" "buffers/tabs"
+            "w" "windows"
+            "p" "projects"
+            "g" "git"
+            "e" "explorer"
+            "t" "terminal"
+            "n" "notes"
+            "m" "media"
+            "a" "apps/fun")
+          (which-key-add-keymap-based-replacements my-notes-map
+            "d" "dailies")))
 
       ;; --- LSP Mode ---
       (use-package lsp-mode
@@ -450,9 +476,11 @@
         (start-process "mpv" nil "mpv" file))
 
 
+
       ;; --- Visualizers & Fun ---
       (use-package fireplace
         :commands fireplace)
+
 
 
       ;; --- Vterm ---
