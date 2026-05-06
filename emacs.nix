@@ -107,7 +107,7 @@
       mu4e
     ];
 
-    # Load init.el directly — all Elisp config lives there
+    # Load init.el directy
     extraConfig = builtins.readFile ./init.el;
   };
 }
