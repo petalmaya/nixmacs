@@ -1,26 +1,26 @@
 ;; -*- lexical-binding: t; -*-
-;; =============================================================================
+;; ======================================
 ;; init.el — Alice's Emacs Configuration
 ;; Packages are managed by Nix (emacs.nix).
-;; =============================================================================
+;; ======================================
 
-;; ---------------------------------------------------------------------------
+;; ---------------------
 ;; Startup Performance
-;; ---------------------------------------------------------------------------
+;; ---------------------
 (setq gc-cons-threshold (* 50 1024 1024)) ; 50mb during startup
 (add-hook 'emacs-startup-hook
           (lambda ()
             (setq gc-cons-threshold (* 2 1024 1024)) ; 2mb after startup
             (message "Emacs loaded in %s" (emacs-init-time))))
 
-;; ---------------------------------------------------------------------------
+;; -------------------------------------
 ;; Theme & UI (early load)
-;; ---------------------------------------------------------------------------
+;; -------------------------------------
 (load-theme 'doom-laserwave t)
 
-;; ---------------------------------------------------------------------------
+;; -------------------------------------
 ;; Basic UI
-;; ---------------------------------------------------------------------------
+;; -------------------------------------
 (setq inhibit-startup-message t)
 (scroll-bar-mode -1)   ; Disable visible scrollbar
 (tool-bar-mode -1)     ; Disable the toolbar
@@ -36,26 +36,26 @@
 (setq display-line-numbers-type 'relative)
 (global-display-line-numbers-mode t)
 
-;; ---------------------------------------------------------------------------
+;; -------------------------------------
 ;; Modeline
-;; ---------------------------------------------------------------------------
+;; -------------------------------------
 (doom-modeline-mode 1)
 (setq doom-modeline-height 35)
 
-;; ---------------------------------------------------------------------------
+;; -------------------------------------
 ;; All-the-icons
 ;; Note: run M-x all-the-icons-install-fonts once after first install
-;; ---------------------------------------------------------------------------
+;; -------------------------------------
 (use-package all-the-icons
   :if (display-graphic-p))
 
-;; ---------------------------------------------------------------------------
+;; -------------------------------------
 ;; Rainbow Delimiters
-;; ---------------------------------------------------------------------------
+;; -------------------------------------
 (use-package rainbow-delimiters
   :hook (prog-mode . rainbow-delimiters-mode))
 
-;; ---------------------------------------------------------------------------
+;; -------------------------------------
 ;; Centaur Tabs
 ;; ---------------------------------------------------------------------------
 (use-package centaur-tabs
@@ -76,9 +76,9 @@
   ("C-<prior>" . centaur-tabs-backward)
   ("C-<next>"  . centaur-tabs-forward))
 
-;; ---------------------------------------------------------------------------
+;; -------------------------------------
 ;; Dashboard
-;; ---------------------------------------------------------------------------
+;; -------------------------------------
 (use-package dashboard
   :demand t
   :init
@@ -92,42 +92,42 @@
   (dashboard-setup-startup-hook)
   (dashboard-insert-startupify-lists))
 
-;; ---------------------------------------------------------------------------
+;; -------------------------------------
 ;; Xah Fly Keys (Modal Editing)
-;; ---------------------------------------------------------------------------
+;; -------------------------------------
 (use-package xah-fly-keys
   :demand t
   :config
   (xah-fly-keys-set-layout "qwerty")
   (xah-fly-keys 1))
 
-;; ---------------------------------------------------------------------------
+;; -------------------------------------
 ;; Magit
-;; ---------------------------------------------------------------------------
+;; -------------------------------------
 (use-package magit
   :commands magit-status
   :bind ("C-x g" . magit-status))
 
-;; ---------------------------------------------------------------------------
+;; -------------------------------------
 ;; Which-Key
-;; ---------------------------------------------------------------------------
+;; -------------------------------------
 (use-package which-key
   :demand t
   :init (which-key-mode)
   :config
   (setq which-key-idle-delay 0.3))
 
-;; ---------------------------------------------------------------------------
+;; -------------------------------------
 ;; Marginalia (rich annotations in the minibuffer)
-;; ---------------------------------------------------------------------------
+;; -------------------------------------
 (use-package marginalia
   :demand t
   :config
   (marginalia-mode 1))
 
-;; ---------------------------------------------------------------------------
+;; -------------------------------------
 ;; Consult (enhanced search & navigation)
-;; ---------------------------------------------------------------------------
+;; -------------------------------------
 (use-package consult
   :bind (("C-s"     . consult-line)
          ("C-x b"   . consult-buffer)
@@ -174,9 +174,9 @@
   (setq ivy-posframe-display-functions-alist '((t . ivy-posframe-display-at-frame-center)))
   (ivy-posframe-mode 1))
 
-;; ---------------------------------------------------------------------------
+;; -------------------------------------
 ;; Projectile
-;; ---------------------------------------------------------------------------
+;; -------------------------------------
 (use-package projectile
   :diminish projectile-mode
   :config (projectile-mode)
@@ -187,9 +187,9 @@
     (setq projectile-project-search-path '("~/projects")))
   (setq projectile-switch-project-action #'projectile-dired))
 
-;; ---------------------------------------------------------------------------
+;; -------------------------------------
 ;; Treemacs
-;; ---------------------------------------------------------------------------
+;; -------------------------------------
 (use-package treemacs
   :defer t
   :init
@@ -216,9 +216,9 @@
 (use-package lsp-treemacs
   :after (treemacs lsp-mode))
 
-;; ---------------------------------------------------------------------------
+;; -------------------------------------
 ;; Org-Roam
-;; ---------------------------------------------------------------------------
+;; -------------------------------------
 (use-package org-roam
   :demand t
   :init
@@ -257,9 +257,9 @@
   (make-directory org-roam-directory t)
   (org-roam-db-autosync-mode))
 
-;; ---------------------------------------------------------------------------
+;; -------------------------------------
 ;; Org-Roam UI
-;; ---------------------------------------------------------------------------
+;; -------------------------------------
 (use-package org-roam-ui
   :after org-roam
   :config
@@ -268,9 +268,9 @@
         org-roam-ui-update-on-save t
         org-roam-ui-open-on-start nil))
 
-;; ---------------------------------------------------------------------------
+;; -------------------------------------
 ;; Org-Modern (prettier org buffers)
-;; ---------------------------------------------------------------------------
+;; -------------------------------------
 (use-package org-modern
   :hook
   (org-mode . org-modern-mode)
@@ -280,9 +280,9 @@
         org-modern-table t
         org-modern-block-fringe 8))
 
-;; ---------------------------------------------------------------------------
+;; -------------------------------------
 ;; Org-Appear (show markup on cursor entry)
-;; ---------------------------------------------------------------------------
+;; -------------------------------------
 (use-package org-appear
   :hook (org-mode . org-appear-mode)
   :config
@@ -291,9 +291,9 @@
         org-appear-autoentities t
         org-appear-autokeywords t))
 
-;; ---------------------------------------------------------------------------
+;; -------------------------------------
 ;; DAP Mode (Debug Adapter Protocol)
-;; ---------------------------------------------------------------------------
+;; -------------------------------------
 (use-package dap-mode
   :after lsp-mode
   :commands (dap-debug dap-debug-last dap-breakpoint-toggle)
@@ -304,18 +304,18 @@
   (require 'dap-lldb)   ; C/C++ via LLDB
   (require 'dap-node))  ; Node.js / TypeScript
 
-;; ---------------------------------------------------------------------------
+;; -------------------------------------
 ;; Mastodon.el (Fediverse client)
-;; ---------------------------------------------------------------------------
+;; -------------------------------------
 (use-package mastodon
   :commands mastodon
   :config
   (setq mastodon-instance-url "https://fosstodon.org/ "
         mastodon-active-user "alicel"))  ;
 
-;; ---------------------------------------------------------------------------
+;; -------------------------------------
 ;; LSP Mode
-;; ---------------------------------------------------------------------------
+;; -------------------------------------
 (use-package lsp-mode
   :commands (lsp lsp-deferred)
   :init
@@ -332,9 +332,9 @@
         company-minimum-prefix-length 1)
   (global-company-mode t))
 
-;; ---------------------------------------------------------------------------
+;; -------------------------------------
 ;; Language Support
-;; ---------------------------------------------------------------------------
+;; -------------------------------------
 (use-package haskell-mode
   :mode "\\.hs\\'"
   :hook (haskell-mode . lsp-deferred))
@@ -358,15 +358,15 @@
 (add-hook 'c++-mode-hook 'lsp-deferred)
 (add-hook 'python-mode-hook 'lsp-deferred)
 
-;; ---------------------------------------------------------------------------
+;; -------------------------------------
 ;; Ement.el (Matrix Client)
-;; ---------------------------------------------------------------------------
+;; -------------------------------------
 (use-package ement
   :commands ement-connect)
 
-;; ---------------------------------------------------------------------------
+;; -------------------------------------
 ;; EMMS (Emacs Multimedia System)
-;; ---------------------------------------------------------------------------
+;; -------------------------------------
 (use-package emms
   :commands (emms emms-play-file)
   :config
@@ -381,38 +381,79 @@
   (interactive "fVideo file: ")
   (start-process "mpv" nil "mpv" file))
 
-;; ---------------------------------------------------------------------------
+;; -------------------------------------
 ;; Fireplace (cosy)
-;; ---------------------------------------------------------------------------
+;; -------------------------------------
 (use-package fireplace
   :commands fireplace)
 
-;; ---------------------------------------------------------------------------
+;; -------------------------------------
 ;; Vterm
-;; ---------------------------------------------------------------------------
+;; -------------------------------------
 (use-package vterm
   :commands vterm
   :config
   (setq vterm-max-scrollback 5000))
 
-;; ---------------------------------------------------------------------------
+;; -------------------------------------
+;; TRAMP (Remote Development & Root Editing)
+;; -------------------------------------
+(use-package tramp
+  :defer t
+  :config
+  ;; Default to SSH for fast interactive remote access
+  (setq tramp-default-method "ssh")
+
+  ;; Performance optimization
+  (setq remote-file-name-inhibit-cache nil
+        tramp-verbose 1
+        remote-file-name-inhibit-locks t
+        remote-file-name-inhibit-auto-save-visited t)
+
+  ;; Faster version control checking over TRAMP (only check Git, bypass others)
+  (setq vc-handled-backends '(Git))
+
+  ;; Enable control master for ssh connection reuse
+  (customize-set-variable 'tramp-use-connection-share t)
+
+  ;; Direct async processes for improved remote execution speed (Magit, LSP, etc. over TRAMP)
+  (connection-local-set-profile-variables
+   'remote-direct-async-process
+   '((tramp-direct-async-process . t)))
+  (connection-local-set-profiles
+   '((tramp-connection-type . direct-async))
+   'remote-direct-async-process)
+
+  ;; Maintain clean remote paths using the remote's own path
+  (add-to-list 'tramp-remote-path 'tramp-own-remote-path))
+
+;; Sudo editing helper
+(defun nixmacs-sudo-edit (&optional arg)
+  "Edit currently visited file as root via TRAMP sudo."
+  (interactive "P")
+  (if (or arg (not buffer-file-name))
+      (find-file (concat "/sudo:root@localhost:"
+                         (read-file-name "Find file (as root): ")))
+    (find-alternate-file (concat "/sudo:root@localhost:" buffer-file-name))))
+
+;; -------------------------------------
 ;; Nov.el (EPUB Reader)
-;; ---------------------------------------------------------------------------
+;; -------------------------------------
 (use-package nov
   :mode ("\\.epub\\'" . nov-mode)
   :config
   (setq nov-text-width 80))
 
-;; ---------------------------------------------------------------------------
+;; -------------------------------------
 ;; Elfeed (RSS Reader)
-;; ---------------------------------------------------------------------------
+;; -------------------------------------
 (use-package elfeed
   :commands elfeed
   :bind ("C-x w" . elfeed))
 
-;; ---------------------------------------------------------------------------
+;; -------------------------------------
 ;; Mu4e (Email Client)
-;; ---------------------------------------------------------------------------
+;; -------------------------------------
 (use-package mu4e
   :commands mu4e
   :config
@@ -421,9 +462,9 @@
         mu4e-get-mail-command "mbsync -a"
         mu4e-maildir "~/Mail"))
 
-;; ---------------------------------------------------------------------------
+;; -------------------------------------
 ;; Keybindings (SPC Leader via Xah Fly Keys)
-;; ---------------------------------------------------------------------------
+;; -------------------------------------
 (with-eval-after-load 'xah-fly-keys
   (define-prefix-command 'my-leader-map)
   (define-prefix-command 'my-file-map)
@@ -453,6 +494,8 @@
   (define-key my-file-map (kbd "f") 'counsel-find-file)
   (define-key my-file-map (kbd "s") 'save-buffer)
   (define-key my-file-map (kbd "r") 'consult-recent-file)
+  (define-key my-file-map (kbd "S") 'nixmacs-sudo-edit)
+  (define-key my-file-map (kbd "t") 'tramp-cleanup-all-connections)
 
   ;; Buffers / Tabs (SPC b)
   (define-key my-leader-map (kbd "b") 'my-buffer-map)
