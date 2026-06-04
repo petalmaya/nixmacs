@@ -16,7 +16,7 @@
 ;; -------------------------------------
 ;; Theme & UI (early load)
 ;; -------------------------------------
-(load-theme 'doom-laserwave t)
+(load-theme 'doom-gruvbox t)
 
 ;; -------------------------------------
 ;; Basic UI
