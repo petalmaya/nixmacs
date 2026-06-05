@@ -19,6 +19,7 @@
     graphviz                     # Optional: for org-roam graph visualizations
     mu                           # Required by mu4e
     isync                        # Commonly used with mu4e for fetching mail
+    sbcl                         # Common Lisp implementation (used by SLY)
     # DAP debug adapters
     lldb                         # C/C++ debug adapter (via dap-lldb)
     nodejs                       # Node.js debug adapter (via dap-node)
@@ -33,10 +34,10 @@
       xah-fly-keys
 
       # UI & Theming
-      doom-themes
+      ef-themes
+      spacious-padding
       doom-modeline
       all-the-icons
-      centaur-tabs
       dashboard
       rainbow-delimiters
 
@@ -45,10 +46,10 @@
       org-appear
 
       # Completion & Navigation
-      ivy
-      counsel
-      swiper
-      ivy-posframe
+      vertico
+      orderless
+      embark
+      embark-consult
       consult
       marginalia
 
@@ -71,6 +72,13 @@
       nix-mode
       js2-mode
       typescript-mode
+
+      # Common Lisp
+      sly
+      sly-quicklisp
+      sly-asdf
+      sly-named-readtables
+      paredit
 
       # Debug Adapter Protocol
       dap-mode
