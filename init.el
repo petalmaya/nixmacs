@@ -232,23 +232,20 @@
 
 (use-package sly
   :commands (sly sly-connect)
+  :init
+  ;; Declare ALL contribs before SLY/SLYNK loads — adding them later causes
+  ;; "Package SLYNK-MREPL does not exist" because the server starts without them.
+  (setq sly-contribs '(sly-fancy sly-asdf sly-named-readtables))
   :config
-  (setq inferior-lisp-program "sbcl")
-  ;; Nicer sly-mrepl buffer name
-  (setq sly-mrepl-pop-sylvester nil))
+  (setq inferior-lisp-program "sbcl"
+        sly-mrepl-pop-sylvester nil))
 
-;; Quicklisp integration (load system, quickload etc)
-(use-package sly-quicklisp :after sly)
 
 ;; ASDF integration
-(use-package sly-asdf
-  :after sly
-  :config (add-to-list 'sly-contribs 'sly-asdf 'append))
+(use-package sly-asdf :after sly)
 
 ;; Named readtables (useful for e.g. cl-interpol)
-(use-package sly-named-readtables
-  :after sly
-  :config (add-to-list 'sly-contribs 'sly-named-readtables 'append))
+(use-package sly-named-readtables :after sly)
 
 ;; Paredit for structural s-expr editing
 (use-package paredit
