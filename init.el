@@ -392,6 +392,20 @@
                          (read-file-name "Find file (as root): ")))
     (find-alternate-file (concat "/sudo:root@localhost:" buffer-file-name))))
 
+;;; Dired
+
+(use-package dired
+  :ensure nil  ; built-in
+  :config
+  ;; Reuse the same buffer when navigating into a subdirectory,
+  ;; instead of spawning a new one each time.
+  (setq dired-kill-when-opening-new-dired-buffer t)
+  :bind (:map dired-mode-map
+         ;; RET and ^ both reuse the current buffer (no new buffer spam)
+         ("RET" . dired-find-alternate-file)
+         ("^"   . (lambda () (interactive)
+                    (find-alternate-file "..")))))
+
 ;;; Other readers
 
 (use-package nov
