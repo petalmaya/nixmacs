@@ -2,6 +2,12 @@
 #+options: toc:nil
 
 
+#+begin_warning
+**WARNING: OUTDATED BRANCH**
+This is a legacy branch of my emacs config relying on nix to keep things up to date.
+It will not recive updates. Though you might still enjoy it.
+#+end_warning
+
 #+caption: screenshot emacs
 [[file:screenshot.png]]
 
