@@ -5,7 +5,6 @@
 #+caption: screenshot emacs
 [[file:screenshot.png]]
 
-
 * What?
 This is my emacs config i use for pretty much anything. I think its decently well made, its a flake so you can use it wherever~
 
